@@ -192,7 +192,7 @@ namespace CoreCodeCamp.Controllers
 
                 if (await this.repository.SaveChangesAsync())
                 {
-                    Ok("Camp was deleted");
+                    return Ok("Camp was deleted");
                 }
             }
             catch (Exception)
@@ -208,6 +208,6 @@ namespace CoreCodeCamp.Controllers
  * VERY IMPORTANT!!!
  * 
  * In order to update the database run: "dotnet ef database update" in the path where the solution file is. It is also
- * important to mention that the solucion cannot run while updating the database, otherwise the build will throw an error.
+ * important to mention that the solution cannot run while updating the database, otherwise the build will throw an error.
  * 
  */
