@@ -131,8 +131,7 @@ namespace CoreCodeCamp.Controllers
                 }
 
                 //This is the reverse of what happens in the get methods. Here the campModel is mapped into a Camp.
-                var newCamp = this.mapper.Map<Camp>(campModel); //FOR SOME REASON THIS DOESN'T WORK. CANNOT MAP campModel INTO
-                                                                //A Camp OBJECT.
+                var newCamp = this.mapper.Map<Camp>(campModel);
 
                 this.repository.Add(newCamp);
 
@@ -162,7 +161,7 @@ namespace CoreCodeCamp.Controllers
                 }
 
                 //"oldCamp" is of type Camp.
-                this.mapper.Map(campModel, oldCamp); //LIKE IN THE POST METHOD, IT SEEMS LIKE THERE IS A PROBLEM WITH THE MAP.
+                this.mapper.Map(campModel, oldCamp);
 
                 if (await this.repository.SaveChangesAsync())
                 {

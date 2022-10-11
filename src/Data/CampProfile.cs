@@ -10,6 +10,9 @@ namespace CoreCodeCamp.Data
         {
             this.CreateMap<Camp, CampModel>();
 
+            //This was missing. Without this the mapper couldn't map CampModel objects into Camp objects.
+            this.CreateMap<CampModel, Camp>(); 
+
             /*
              * A way to include properties in the CampModel that don't come from the Camp class.
              * 
