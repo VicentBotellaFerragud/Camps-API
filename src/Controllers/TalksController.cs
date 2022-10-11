@@ -33,9 +33,9 @@ namespace CoreCodeCamp.Controllers
         {
             try
             {
-                var talks = await this.repository.GetTalksByMonikerAsync(moniker);
+                var results = await this.repository.GetTalksByMonikerAsync(moniker);
 
-                TalkModel[] models = this.mapper.Map<TalkModel[]>(talks);
+                TalkModel[] models = this.mapper.Map<TalkModel[]>(results);
 
                 return Ok(models);
             }
@@ -43,6 +43,70 @@ namespace CoreCodeCamp.Controllers
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<TalkModel>> Get(string moniker, int id)
+        {
+            try
+            {
+                var result = await this.repository.GetTalkByMonikerAsync(moniker, id);
+
+                TalkModel model = this.mapper.Map<TalkModel>(result);
+
+                return Ok(model);
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+            }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<TalkModel>> Post(string moniker, TalkModel talkModel)
+        {
+            try
+            {
+                var camp = await this.repository.GetCampAsync(moniker);
+
+                if (camp == null)
+                {
+                    return BadRequest("Camp does not exist");
+                }
+
+                var newTalk = this.mapper.Map<Talk>(talkModel);
+                newTalk.Camp = camp;
+
+                if (talkModel.Speaker == null)
+                {
+                    return BadRequest("Speaker Id is required");
+                }
+
+                var speaker = this.repository.GetSpeakerAsync(talkModel.Speaker.SpeakerId);
+
+                if (speaker == null)
+                {
+                    return BadRequest("Speaker couldn't be found");
+                }
+
+                newTalk.Speaker = speaker;
+
+                this.repository.Add(newTalk);
+
+                if (await this.repository.SaveChangesAsync())
+                {
+                    var url = this.linkGenerator.GetPathByAction(HttpContext, 
+                        "Get", 
+                        values : new { moniker, id = newTalk.TalkId });
+
+                    return Created(url, this.mapper.Map<TalkModel>(newTalk));
+                }
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+            }
+            return BadRequest("Failed to save new talk");
         }
     }
 }
