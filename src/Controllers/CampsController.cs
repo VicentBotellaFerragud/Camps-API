@@ -9,6 +9,7 @@ using CoreCodeCamp.Data;
 using CoreCodeCamp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 /*
  * For each request ASP.NET Core tries to match the route of the request URL with any of the existing routes of the project.
@@ -22,19 +23,27 @@ namespace CoreCodeCamp.Controllers
 {
     //"[controller]" means --> route is whatever comes before the word "controller" ("camps" in this case).
     [Route("api/[controller]")]
+
+    //This tells the project (among other things) to make body binding by post or put requests.
+    [ApiController] 
     public class CampsController : ControllerBase
     {
-        //Property to which the ICampRepository is assigned in the constructor.
+        //Property of type ICampRepository.
         private readonly ICampRepository repository;
 
-        //Property to which the IMapper is assigned in the constructor.
+        //Property of type IMapper.
         private readonly IMapper mapper;
 
-        //Constructor. Here is the ICampRepository and the IMapper injected.
-        public CampsController(ICampRepository repository, IMapper mapper)
+        //Property of type LinkGenerator.
+        private readonly LinkGenerator linkGenerator;
+
+        //Constructor.
+        public CampsController(ICampRepository repository, IMapper mapper, LinkGenerator linkGenerator)
         {
+            //The in-the-constructor injected parameters are assigned to the local properties (of course types of both match).
             this.repository = repository;
             this.mapper = mapper;
+            this.linkGenerator = linkGenerator;
         }
 
         //Indicates the method/action.
@@ -100,6 +109,98 @@ namespace CoreCodeCamp.Controllers
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<CampModel>> Post(CampModel campModel)
+        {
+            try
+            {
+                var existing = await this.repository.GetCampAsync(campModel.Moniker);
+
+                if (existing != null)
+                {
+                    return BadRequest("Moniker in use");
+                }
+
+                var location = this.linkGenerator.GetPathByAction("Get", "Camps", new { moniker = campModel.Moniker });
+
+                if (string.IsNullOrWhiteSpace(location))
+                {
+                    return BadRequest("Could not use current moniker");
+                }
+
+                //This is the reverse of what happens in the get methods. Here the campModel is mapped into a Camp.
+                var newCamp = this.mapper.Map<Camp>(campModel); //FOR SOME REASON THIS DOESN'T WORK. CANNOT MAP campModel INTO
+                                                                //A Camp OBJECT.
+
+                this.repository.Add(newCamp);
+
+                if (await this.repository.SaveChangesAsync())
+                {
+                    //The mapper is used again to return an instance of a CampModel (that's always what we want the user to see).
+                    return Created(location, this.mapper.Map<CampModel>(newCamp));
+                }
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+            }
+            return BadRequest();
+        }
+
+        [HttpPut("{moniker}")]
+        public async Task<ActionResult<CampModel>> Put(string moniker, CampModel campModel)
+        {
+            try
+            {
+                var oldCamp = await this.repository.GetCampAsync(moniker);
+
+                if (oldCamp == null)
+                {
+                    return NotFound($"Could not find camp with moniker {moniker}");
+                }
+
+                //"oldCamp" is of type Camp.
+                this.mapper.Map(campModel, oldCamp); //LIKE IN THE POST METHOD, IT SEEMS LIKE THERE IS A PROBLEM WITH THE MAP.
+
+                if (await this.repository.SaveChangesAsync())
+                {
+                    var editedCamp = this.mapper.Map<CampModel>(oldCamp);
+                    return editedCamp;
+                }
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+            }
+            return BadRequest();
+        }
+
+        [HttpDelete("{moniker}")]
+        public async Task<ActionResult<CampModel>> Delete(string moniker)
+        {
+            try
+            {
+                var oldCamp = await this.repository.GetCampAsync(moniker);
+
+                if (oldCamp == null)
+                {
+                    return NotFound($"Could not find camp with moniker {moniker}");
+                }
+
+                this.repository.Delete(oldCamp);
+
+                if (await this.repository.SaveChangesAsync())
+                {
+                    Ok("Camp was deleted");
+                }
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+            }
+            return BadRequest("Failed to delete the camp");
         }
     }
 }

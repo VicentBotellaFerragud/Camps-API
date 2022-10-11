@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using CoreCodeCamp.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace CoreCodeCamp.Models
 {
@@ -11,9 +12,15 @@ namespace CoreCodeCamp.Models
      */
     public class CampModel
     {
+        [Required]
+        [StringLength(100)]
         public string Name { get; set; }
+        [Required]
         public string Moniker { get; set; }
+        [Required]
         public DateTime EventDate { get; set; } = DateTime.MinValue;
+        [Required]
+        [Range (1, 100)]
         public int Length { get; set; } = 1;
 
         //By prefixing these properties with the word "Location" (the class that contains these properties)
