@@ -82,7 +82,7 @@ namespace CoreCodeCamp.Controllers
                     return BadRequest("Speaker Id is required");
                 }
 
-                var speaker = this.repository.GetSpeakerAsync(talkModel.Speaker.SpeakerId);
+                var speaker = await this.repository.GetSpeakerAsync(talkModel.Speaker.SpeakerId);
 
                 if (speaker == null)
                 {
