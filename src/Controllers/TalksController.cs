@@ -33,7 +33,7 @@ namespace CoreCodeCamp.Controllers
         {
             try
             {
-                var results = await this.repository.GetTalksByMonikerAsync(moniker);
+                var results = await this.repository.GetTalksByMonikerAsync(moniker, true);
 
                 TalkModel[] models = this.mapper.Map<TalkModel[]>(results);
 
@@ -50,7 +50,12 @@ namespace CoreCodeCamp.Controllers
         {
             try
             {
-                var result = await this.repository.GetTalkByMonikerAsync(moniker, id);
+                var result = await this.repository.GetTalkByMonikerAsync(moniker, id, true);
+
+                if (result == null)
+                {
+                    return BadRequest("Talk couldn't be found");
+                }
 
                 TalkModel model = this.mapper.Map<TalkModel>(result);
 
