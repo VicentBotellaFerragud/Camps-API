@@ -8,7 +8,9 @@ namespace CoreCodeCamp.Data
         public TalkProfile()
         {
             this.CreateMap<Talk, TalkModel>();
-            this.CreateMap<TalkModel, Talk>();
+            this.CreateMap<TalkModel, Talk>()
+                .ForMember(t => t.Camp, opt => opt.Ignore())
+                .ForMember(t => t.Speaker, opt => opt.Ignore());
         }
     }
 }
