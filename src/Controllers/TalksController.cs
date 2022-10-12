@@ -149,5 +149,31 @@ namespace CoreCodeCamp.Controllers
             }
             return BadRequest("Failed to update the talk");
         }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(string moniker, int id)
+        {
+            try
+            {
+                var talkToDelete = await this.repository.GetTalkByMonikerAsync(moniker, id); 
+
+                if (talkToDelete == null)
+                {
+                    return NotFound($"Could not find talk with id {id}");
+                }
+
+                this.repository.Delete(talkToDelete);
+
+                if (await this.repository.SaveChangesAsync())
+                {
+                    return Ok("Talk was deleted");
+                }
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+            }
+            return BadRequest("Failed to delete the talk");
+        }
     }
 }

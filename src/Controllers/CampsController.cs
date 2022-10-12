@@ -177,18 +177,18 @@ namespace CoreCodeCamp.Controllers
         }
 
         [HttpDelete("{moniker}")]
-        public async Task<ActionResult<CampModel>> Delete(string moniker)
+        public async Task<IActionResult> Delete(string moniker)
         {
             try
             {
-                var oldCamp = await this.repository.GetCampAsync(moniker);
+                var campToDelete = await this.repository.GetCampAsync(moniker);
 
-                if (oldCamp == null)
+                if (campToDelete == null)
                 {
                     return NotFound($"Could not find camp with moniker {moniker}");
                 }
 
-                this.repository.Delete(oldCamp);
+                this.repository.Delete(campToDelete);
 
                 if (await this.repository.SaveChangesAsync())
                 {
