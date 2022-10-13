@@ -3,14 +3,14 @@ using CoreCodeCamp.Models;
 
 namespace CoreCodeCamp.Data
 {
-    //Inherits from the AutoMapper Profile class and maps the Camp class into the CampModel class.
+    //Inherits from the AutoMapper Profile class and maps the Camp class to the CampModel class.
     public class CampProfile : Profile
     {
         public CampProfile()
         {
             this.CreateMap<Camp, CampModel>();
 
-            //This was missing. Without this the mapper couldn't map CampModel objects into Camp objects.
+            //This was missing. Without this the mapper couldn't map CampModel objects to Camp objects.
             this.CreateMap<CampModel, Camp>(); 
 
             /*

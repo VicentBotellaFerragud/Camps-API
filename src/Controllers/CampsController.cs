@@ -130,7 +130,7 @@ namespace CoreCodeCamp.Controllers
                     return BadRequest("Could not use current moniker");
                 }
 
-                //This is the reverse of what happens in the get methods. Here the campModel is mapped into a Camp.
+                //This is the reverse of what happens in the get methods. Here the campModel is mapped to a Camp.
                 var newCamp = this.mapper.Map<Camp>(campModel);
 
                 this.repository.Add(newCamp);
